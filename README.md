@@ -1,66 +1,87 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏨 Ejercicio 19 — Sistema de Reservas Hoteleras
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST desarrollada con **Laravel 10** que modela un sistema de gestión
+hotelera con reservas de habitaciones por agencias y particulares.
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🗄 Modelo de datos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Entidad | Relaciones |
+|---|---|
+| `Categoria` | tiene muchos `Hotel` |
+| `Hotel` | pertenece a `Categoria`, tiene muchas `Habitacion` |
+| `Habitacion` | pertenece a `Hotel`, reservada por `Agencia` y `Particular` (N:M) |
+| `Agencia` | reserva muchas `Habitacion` |
+| `Particular` | reserva muchas `Habitacion` |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> Las tablas pivote `agencia_habitacion` y `particular_habitacion`
+> almacenan `fecha_ini` y `fecha_fin` de cada reserva.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🔍 Query Params disponibles
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Todos los endpoints soportan los siguientes parámetros:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Parámetro | Descripción | Ejemplo |
+|---|---|---|
+| `included` | Carga relaciones | `?included=categoria` |
+| `filter[campo]` | Filtra por campo | `?filter[nombre]=Hotel` |
+| `sort` | Ordena ASC, `-campo` DESC | `?sort=-nombre` |
+| `perPage` | Pagina resultados | `?perPage=5` |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Endpoints
 
-### Premium Partners
+### 2.1 · Reservas por agencia
+GET /api/consultas/reservas-agencia
+GET /api/consultas/reservas-agencia?included=habitaciones
+GET /api/consultas/reservas-agencia?included=habitaciones&filter[nombre]=Kulas
+GET /api/consultas/reservas-agencia?included=habitaciones&perPage=2
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 2.2 · Reservas por particulares
+GET /api/consultas/reservas-particulares
+GET /api/consultas/reservas-particulares?included=habitaciones
+GET /api/consultas/reservas-particulares?included=habitaciones&perPage=3
 
-## Contributing
+### 2.3 · Hoteles con categoría
+GET /api/consultas/hoteles-con-categoria
+GET /api/consultas/hoteles-con-categoria?included=categoria
+GET /api/consultas/hoteles-con-categoria?included=categoria&sort=-nombre
+GET /api/consultas/hoteles-con-categoria?included=categoria&filter[nombre]=Hotel
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🧪 Base URL
+http://localhost:8000/api
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📁 Estructura relevante
+app/
+├── Http/Controllers/ConsultasController.php
+├── Models/
+│   ├── Agencia.php
+│   ├── Categoria.php
+│   ├── Habitacion.php
+│   ├── Hotel.php
+│   └── Particular.php
+└── Traits/
+└── HasQueryScopes.php          ← scopes reutilizables (DRY)
+database/
+├── factories/                      ← datos de prueba
+├── migrations/                     ← 7 migraciones (5 entidades + 2 pivotes)
+└── seeders/
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 👤 Autor
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+ - Cristian Acosta
+
+## | Instructor 
+
+ - Alejandro Plazas
+
+Desarrollado como ejercicio académico del Taller del plan de mejoramiento — Programa ADSO · SENA Ficha : 3066446
